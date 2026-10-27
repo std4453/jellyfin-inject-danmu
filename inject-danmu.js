@@ -25,14 +25,14 @@
 
     // 配置项
     // 固定依赖版本，避免 unpkg 的 latest 标签在无感情况下改变播放器行为。
-    const DANMAKU_LIB_URL = 'https://unpkg.com/danmaku@2.0.10/dist/danmaku.min.js';
+    const DANMAKU_LIB_URL = new URL('danmaku.min.js', document.currentScript?.src || location.href).href;
     // 填写完整的在线 API 基址（可包含部署路径前缀），例如：
     // https://danmu.example.com/your-api-prefix
     // 留空时会安全跳过在线查询。
     const ONLINE_DANMU_SERVICE_URL = '';
-    // 查询顺序配置：支持 'local' (本地插件) 和 'online' (在线API)。
+    // 默认按单集 ProviderIds 查询；local / online 保留为手动修改脚本后的兼容选项。
     // 例如优先本地再在线: ['local', 'online']; 仅在线: ['online']
-    const DANMAKU_QUERY_ORDER = ['local', 'online'];
+    const DANMAKU_QUERY_ORDER = ['provider'];
     // 直方图功能开关（设为 false 可临时禁用，排查问题时使用）
     const ENABLE_HISTOGRAM = true;
 
@@ -557,7 +557,9 @@
             const headers = token ? { Authorization: `MediaBrowser Token="${token}"` } : {};
             for (const source of DANMAKU_QUERY_ORDER) {
                 throwIfAborted(signal);
-                if (source === 'local') {
+                if (source === 'provider') {
+                    return await fetchDanmakuFromProvider(itemId, headers, signal);
+                } else if (source === 'local') {
                     const comments = await fetchDanmakuFromLocalApi(itemId, headers, signal);
                     if (comments.length) {
                         throwIfAborted(signal);
@@ -628,16 +630,51 @@
             await waitForApiClient(signal);
             const userId = window.ApiClient?.getCurrentUserId?.();
             if (!userId) return null;
-            const url = getJellyfinApiUrl(`Users/${encodeURIComponent(userId)}/Items/${encodeURIComponent(itemId)}`);
-            const response = await fetchWithTimeout(url, { headers, timeout: 5000, signal });
+            const url = new URL(getJellyfinApiUrl('Items'));
+            url.searchParams.set('userId', userId);
+            url.searchParams.set('ids', itemId);
+            url.searchParams.set('fields', 'ProviderIds');
+            const response = await fetchWithTimeout(url.toString(), { headers, timeout: 5000, signal });
             if (!response.ok) return null;
-            const item = await response.json();
+            const result = await response.json();
             throwIfAborted(signal);
-            return item;
+            return result.Items?.find(item => item.Id.toLowerCase() === itemId.toLowerCase()) || null;
         } catch (error) {
             if (isAbortError(error)) throw error;
             console.warn('[Danmaku Injector] 获取视频元数据失败:', error);
             return null;
+        }
+    }
+
+    // 单集 ProviderIds 是播放身份来源；缺少映射时不猜测标题。
+    async function fetchDanmakuFromProvider(itemId, headers, signal) {
+        const item = await fetchItemDetails(itemId, headers, signal);
+        throwIfAborted(signal);
+        if (!item) {
+            showDanmakuSourceToast('无法读取本集信息，请稍后重试');
+            return [];
+        }
+        const value = Object.entries(item.ProviderIds || {}).find(([key]) => key.toLowerCase() === 'danmuid')?.[1];
+        const match = /^dandan:([1-9]\d*)$/.exec(String(value || ''));
+        if (!match) {
+            showDanmakuSourceToast('本集暂无弹弹play映射');
+            return [];
+        }
+        showDanmakuSourceToast('正在加载弹幕');
+        try {
+            const url = getJellyfinApiUrl(`api/dandan/danmu/${match[1]}/download`);
+            const response = await fetchWithTimeout(url, { headers, signal, timeout: 12000 });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const xml = await response.text();
+            throwIfAborted(signal);
+            const comments = parseDanmakuData(xml);
+            showDanmakuSourceToast(comments.length ? '弹幕已加载' : '本集暂无弹幕');
+            return comments;
+        } catch (error) {
+            if (isAbortError(error)) throw error;
+            showDanmakuSourceToast('弹幕加载失败，可稍后重试');
+            console.warn('[Danmaku Injector] Provider danmaku failed:', error);
+            return [];
         }
     }
 

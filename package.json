@@ -1,0 +1,10 @@
+{
+  "name": "jellyfin-inject-danmu",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "build": "node build.cjs"
+  },
+  "dependencies": { "danmaku": "2.0.10" }
+}
