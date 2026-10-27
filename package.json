@@ -7,7 +7,6 @@
     "build": "node build.cjs"
   },
   "dependencies": {
-    "danmaku": "2.0.10",
-    "https-proxy-agent": "5.0.1"
+    "danmaku": "2.0.10"
   }
 }

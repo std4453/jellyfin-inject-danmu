@@ -662,8 +662,8 @@
         }
         showDanmakuSourceToast('正在加载弹幕');
         try {
-            const url = getJellyfinApiUrl(`api/dandan/danmu/${match[1]}/download`);
-            const response = await fetchWithTimeout(url, { headers, signal, timeout: 12000 });
+            const url = getJellyfinApiUrl(`api/dandan/danmu/${match[1]}/download?useCache=true&itemId=${encodeURIComponent(itemId)}`);
+            const response = await fetchWithTimeout(url, { headers, signal, timeout: 45000 });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const xml = await response.text();
             throwIfAborted(signal);

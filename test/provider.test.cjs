@@ -24,7 +24,7 @@ function setup(providerIds, response = { ok: true, text: async () => '<i/>' }) {
 test('case insensitive provider key, direct episode ID, same server authentication', async () => {
   const s = setup({ dAnMuId: 'dandan:186900001' });
   assert.deepEqual(Array.from(await s.run()), ['comment']);
-  assert.equal(s.requests[0].url, '/base/api/dandan/danmu/186900001/download');
+  assert.equal(s.requests[0].url, '/base/api/dandan/danmu/186900001/download?useCache=true&itemId=item');
   assert.equal(s.requests[0].options.headers.Authorization, 'test');
 });
 test('missing and invalid mappings never fall back to title search', async () => {

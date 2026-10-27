@@ -4,30 +4,13 @@ server {
     proxy_http_version 1.1;
     proxy_set_header Connection "";
     location = /health {
-        proxy_pass http://127.0.0.1:3000/health;
-        proxy_connect_timeout 1s;
-        proxy_read_timeout 2s;
+        return 200 'ok';
     }
     location /danmu/ {
         root /usr/share/nginx/html;
         add_header Cache-Control "no-cache";
     }
-    location = /_jellyfin_auth {
-        internal;
-        proxy_pass http://${JELLYFIN_UPSTREAM}/Items?Limit=0;
-        proxy_pass_request_body off;
-        proxy_set_header Content-Length "";
-        proxy_set_header Authorization $http_authorization;
-        proxy_connect_timeout 3s;
-        proxy_read_timeout 5s;
-    }
-    location ~* "^/api/dandan/danmu/[1-9][0-9]{0,15}/download$" {
-        auth_request /_jellyfin_auth;
-        proxy_pass http://127.0.0.1:3000;
-        proxy_read_timeout 12s;
-    }
     location ~* ^/(api/([^/]+/)?danmu(/|$)|plugin/danmu(/|$)) {
-        auth_request /_jellyfin_auth;
         proxy_pass http://${JELLYFIN_UPSTREAM};
         proxy_set_header Authorization $http_authorization;
         proxy_read_timeout 45s;

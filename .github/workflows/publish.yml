@@ -31,10 +31,3 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ghcr.io/${{ github.repository }}:${{ github.sha }},ghcr.io/${{ github.repository }}:main
           labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: bridge
-          push: ${{ github.event_name == 'push' }}
-          tags: ghcr.io/${{ github.repository }}:bridge-${{ github.sha }},ghcr.io/${{ github.repository }}:bridge-main
-          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
