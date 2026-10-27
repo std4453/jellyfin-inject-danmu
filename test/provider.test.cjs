@@ -45,3 +45,23 @@ test('stale result after switching episode is discarded', async () => {
   const s = setup({ DanmuID: 'dandan:1' }, { ok: true, text: async () => { controller.abort(); return '<i/>'; } });
   await assert.rejects(s.run(controller.signal), { name: 'AbortError' });
 });
+
+test('reusing a video element with a new MSE source cancels the old playback', () => {
+  const start = source.indexOf('    function scanPlaybackState()');
+  const end = source.indexOf('    const observer = new MutationObserver', start);
+  const video = { src: 'blob:new' };
+  let cancelled = 0, initialized = 0;
+  const context = {
+    document: { querySelector: selector => selector.startsWith('video') ? video : {} },
+    window: { location: { hash: '#/video', href: 'https://media/web/' } },
+    activePlayback: { video, itemId: 'old', source: 'blob:old' },
+    getCurrentItemId: () => null,
+    cleanupDanmaku: () => { cancelled++; },
+    initDanmaku: item => { assert.equal(item, video); initialized++; },
+  };
+  vm.createContext(context);
+  vm.runInContext(source.slice(start, end), context);
+  context.scanPlaybackState();
+  assert.equal(cancelled, 1);
+  assert.equal(initialized, 1);
+});

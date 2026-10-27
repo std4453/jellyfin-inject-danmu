@@ -951,19 +951,16 @@
             panel.className = 'dm-mobile-panel';
         }
 
-        // 利用 Web Component 的 is 属性和原生 class，让桌面端表单组件彻底原生化
+        // 保留主题样式，使用标准表单控件；Jellyfin 12 的增强控件要求专属 label 容器。
         const selectClass = isMobile ? '' : 'emby-select-withcolor emby-select';
         const inputClass  = isMobile ? '' : 'emby-input';
         const btnClass    = isMobile ? 'dm-setting-btn' : 'raised emby-button';
-        const isSelect    = isMobile ? '' : 'is="emby-select"';
-        const isInput     = isMobile ? '' : 'is="emby-input"';
-        const isBtn       = isMobile ? '' : 'is="emby-button"';
 
         const innerHTML = `
             <div class="${isMobile ? '' : 'actionSheetContent'}" style="${isMobile ? 'display:flex; flex-direction:column; height:100%;' : 'box-sizing: border-box;'}">
                 <div style="display:flex; justify-content:space-between; align-items:center; padding: ${isMobile ? '0 4px 16px 4px' : '0 16px 16px 16px'}; box-sizing: border-box;">
                     <h3 style="margin: 0; font-size: 1.4em; font-weight: normal;">弹幕设置</h3>
-                    <button id="danmaku-settings-reset" class="${btnClass}" ${isBtn} style="${isMobile ? '' : 'margin:0; padding: 0.4em 1em;'}">重置</button>
+                    <button id="danmaku-settings-reset" class="${btnClass}" style="${isMobile ? '' : 'margin:0; padding: 0.4em 1em;'}">重置</button>
                 </div>
                 <div class="${isMobile ? 'dm-scroll-container' : 'actionSheetScroller scrollY'}" style="${isMobile ? '' : 'max-height: 55vh; overflow-y: auto; padding: 0 16px 16px 16px; box-sizing: border-box;'}">
                     <div class="dm-setting-row">
@@ -976,7 +973,7 @@
                     </div>
                     <div class="dm-setting-row">
                         <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">字体样式</div>
-                        <select id="dm-fontfamily" style="width:140px; margin:0;" class="${selectClass}" ${isSelect}>
+                        <select id="dm-fontfamily" style="width:140px; margin:0;" class="${selectClass}">
                             <option value="sans-serif">默认 (无衬线)</option>
                             <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
                             <option value="KaiTi, serif">楷体</option>
@@ -985,7 +982,7 @@
                     </div>
                     <div class="dm-setting-row">
                         <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">显示区域</div>
-                        <select id="dm-area" style="width:140px; margin:0;" class="${selectClass}" ${isSelect}>
+                        <select id="dm-area" style="width:140px; margin:0;" class="${selectClass}">
                             <option value="100">全部 (100%)</option>
                             <option value="75">偏上 (75%)</option>
                             <option value="50">半屏 (50%)</option>
@@ -1002,7 +999,7 @@
                     </div>` : ''}
                     <div class="dm-setting-row">
                         <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">弹幕密度</div>
-                        <select id="dm-density" style="width:140px; margin:0;" class="${selectClass}" ${isSelect}>
+                        <select id="dm-density" style="width:140px; margin:0;" class="${selectClass}">
                             <option value="100">全部 (100%)</option>
                             <option value="75">较多 (75%)</option>
                             <option value="50">半数 (50%)</option>
@@ -1012,7 +1009,7 @@
                     </div>
                     <div class="dm-setting-row">
                         <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">主色调</div>
-                        <select id="dm-base-color" style="width:140px; margin:0;" class="${selectClass}" ${isSelect}>
+                        <select id="dm-base-color" style="width:140px; margin:0;" class="${selectClass}">
                             <option value="original">原色 (默认)</option>
                             <option value="random">随机颜色</option>
                             <option value="white">纯白</option>
@@ -1024,7 +1021,7 @@
                     </div>
                     <div class="dm-setting-row">
                         <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">色彩特效</div>
-                        <select id="dm-color-style" style="width:140px; margin:0;" class="${selectClass}" ${isSelect}>
+                        <select id="dm-color-style" style="width:140px; margin:0;" class="${selectClass}">
                             <option value="default">原色 (默认)</option>
                             <option value="cyberpunk">赛博朋克 (霓虹)</option>
                             <option value="rainbow">幻彩渐变 (彩虹)</option>
@@ -1033,7 +1030,7 @@
                     </div>
                     <div class="dm-setting-row">
                         <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">弹幕速度</div>
-                        <select id="dm-speed" style="width:140px; margin:0;" class="${selectClass}" ${isSelect}>
+                        <select id="dm-speed" style="width:140px; margin:0;" class="${selectClass}">
                             <option value="80">较慢</option>
                             <option value="144" selected>正常</option>
                             <option value="200">较快</option>
@@ -1043,18 +1040,18 @@
                     <div class="dm-setting-row">
                         <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">时间偏移</div>
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <button id="dm-timeoffset-dec" class="${btnClass}" ${isBtn} style="padding: 0.3em 0.6em; min-width:28px;">−</button>
-                            <input type="text" id="dm-timeoffset" class="${inputClass}" ${isInput} style="width:60px; text-align:center; margin:0; padding: 4px 2px;" value="+0">
+                            <button id="dm-timeoffset-dec" class="${btnClass}" style="padding: 0.3em 0.6em; min-width:28px;">−</button>
+                            <input type="text" id="dm-timeoffset" class="${inputClass}" style="width:60px; text-align:center; margin:0; padding: 4px 2px;" value="+0">
                             <span style="font-size:12px; color: var(--theme-secondary-text-color, #aaa);">秒</span>
-                            <button id="dm-timeoffset-inc" class="${btnClass}" ${isBtn} style="padding: 0.3em 0.6em; min-width:28px;">+</button>
+                            <button id="dm-timeoffset-inc" class="${btnClass}" style="padding: 0.3em 0.6em; min-width:28px;">+</button>
                         </div>
                     </div>
                     <div class="dm-setting-row" style="flex-direction:column; align-items:flex-start; gap:8px; border-bottom:none;">
                         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                             <div style="font-size:14px; ${isMobile?'font-weight:500;':''}">屏蔽关键词 (每行一个)</div>
-                            <span id="dm-blocklist-clear" class="${btnClass}" ${isBtn} style="padding: 0.3em 0.8em; font-size:12px; cursor:pointer;">清空</span>
+                            <span id="dm-blocklist-clear" class="${btnClass}" style="padding: 0.3em 0.8em; font-size:12px; cursor:pointer;">清空</span>
                         </div>
-                        <textarea id="dm-blocklist" rows="3" style="width:100%; resize:vertical; box-sizing:border-box; margin:0;" class="${inputClass}" ${isInput}></textarea>
+                        <textarea id="dm-blocklist" rows="3" style="width:100%; resize:vertical; box-sizing:border-box; margin:0;" class="${inputClass}"></textarea>
                     </div>
                 </div>
             </div>
@@ -1656,6 +1653,7 @@
             generation: ++playbackGeneration,
             controller: new AbortController(),
             video: videoElement,
+            source: videoElement.src || videoElement.currentSrc || '',
             itemId: null,
             container: null,
             completed: false,
@@ -1755,8 +1753,9 @@
         if (activePlayback) {
             const observedItemId = getCurrentItemId(videoElement);
             const changedVideo = activePlayback.video !== videoElement;
+            const changedSource = !observedItemId && activePlayback.source !== (videoElement.src || videoElement.currentSrc || '');
             const changedItem = observedItemId && activePlayback.itemId && observedItemId !== activePlayback.itemId;
-            if (changedVideo || changedItem) {
+            if (changedVideo || changedSource || changedItem) {
                 cleanupDanmaku();
                 initDanmaku(videoElement);
             } else if (danmakuInstance) {
