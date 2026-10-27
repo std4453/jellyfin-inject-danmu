@@ -18,4 +18,12 @@
 
 容器需设置 `JELLYFIN_UPSTREAM=主机:端口`。弹幕请求先通过 Jellyfin `/Items?Limit=0` 验证当前凭据，再代理到插件；静态脚本不携带服务端密钥。部署时将弹幕 API 路径与 `/danmu/` 一起路由到此容器。
 
-在线弹幕接口由部署环境提供，需启用弹弹play关联弹幕，并验证身份认证、目标 Jellyfin 版本和连续切集。`inject-danmu-badge.js` 仅用于已有本地 XML 弹幕，可按需单独安装。
+随镜像提供的在线接口启用弹弹play关联弹幕，仍需在目标 Jellyfin 环境验证身份认证和连续切集。`inject-danmu-badge.js` 仅用于已有本地 XML 弹幕，可按需单独安装。
+
+## 在线弹幕服务
+
+同时运行 Dockerfile 的 `web` 和 `bridge` 两个目标，两个容器共享网络命名空间。`bridge` 只监听 `127.0.0.1:3000`，`web` 在 8080 提供静态文件并先向 Jellyfin 验证请求凭据。服务端按已知剧集 ID 请求 Danmaku Anywhere 的原始弹弹play评论接口，启用关联弹幕并转换为 XML，不查询标题、不向外部服务转发 Jellyfin 凭据。
+
+缓存最多 16 MiB、64 集，5 分钟过期；相同 ID 的并发请求合并，最多同时请求 4 个不同 ID。上游错误、非法数据和超时不缓存。可用 `HTTPS_PROXY` 设置服务端代理。无需预下载媒体库弹幕。
+
+采用此接口是因为 cxfksword v2.8.0 的弹弹play来源需要单独应用凭据，未配置时不注册对应下载入口。JavaScript Injector 继续使用社区插件。
